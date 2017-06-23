@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+  <title>Lab 3</title>
+  <link rel="stylesheet" type="text/css" href="Lab%203_files/main.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <meta name="robots" content="nofollow,noarchive">
+</head>
+<body>
+
+<h1>Lab 3 - Clipping</h1>
+
+<p>
+<em>
+Last updated
+2017/03/02 17:58:56
+
+</em>
+</p>
+
+<p><em>Update history:</em></p>
+
+<table>
+
+<tbody><tr>
+   <td><code>2017/03/02:</code></td>
+   <td><code>initial version</code></td>
+</tr>
+
+</tbody></table>
+
+<hr>
+
+<ol>
+<li><a href="#intro">Introduction</a>
+</li><li><a href="#env">Programming Environment</a>
+</li><li><a href="#impl">Routine to Implement</a>
+</li><li><a href="#files">Supplied Files</a>
+</li><li><a href="#submit">What to Submit</a>
+</li><li><a href="#grade">Grading</a>
+</li><li><a href="#notes">Notes</a>
+</li></ol>
+
+<hr>
+
+<a name="intro"></a>
+<h2>1. Introduction</h2>
+
+<p>
+In this course, you will implement some of the 2D drawing routines
+we have been discussing in class.
+This will help improve your understanding of these algorithms.
+</p>
+
+<p>
+This assignment involves polygon clipping.
+You will implement the Sutherland-Hodgman Polygon Clipper
+discussed in class.
+You have the option of doing this assignment in C or C++.
+</p>
+
+<hr>
+
+<a name="env"></a>
+<h2>2. Programming Environment</h2>
+
+<p>
+As with the previous assignments, the programming environment that
+you will use for this assignment is a set of simple modules with
+implementations in C and C++.
+You are free to use any of the implementations.
+The modules include:
+</p>
+
+<ul>
+
+<li>
+<p>
+<code>Buffers</code> - a support module providing OpenGL vertex and
+element buffer support.
+</p>
+
+</li><li>
+<p>
+<code>Canvas</code> - a simple 2D canvas that allows the ability to
+set a pixel.
+</p>
+
+</li><li>
+<p>
+<code>Clipper</code> - a simple module that performs the clipping.
+</p>
+
+</li><li>
+<p>
+<code>ShaderSetup</code> - a support module that handles shader program
+compilation and linking.
+</p>
+
+</li><li>
+<p>
+<code>Vertex</code> - a module that describes the structure of a vertex.
+</p>
+
+</li><li>
+<p>
+<code>clipMain</code> - the main function for the application.
+</p>
+
+</li><li>
+<p>
+<code>shader.vert</code>, <code>shader.frag</code> -
+simple GLSL 1.50 shaders.
+</p>
+
+</li><li>
+<p>
+<code>alt.vert</code>, <code>alt.frag</code> -
+simple GLSL 1.20 shaders.
+</p>
+
+</li></ul>
+
+<p>
+The C version includes a module named
+<code>FloatVector</code> which provides an extensible vector holding
+floating-point values.
+Both the C and C++ versions include a file named <code>header.mak</code>
+for use with the <code>gmakemake</code> program on our systems to create
+a <code>Makefile</code> to simplify compilation and linking of the
+program.
+</p>
+
+<p>
+See the <a href="#files"><em>Supplied Files</em></a> section (below)
+for details on how to download the framework.
+</p>
+
+<hr>
+
+<a name="impl"></a>
+<h2>3. Routine to Implement</h2>
+
+<p>
+The only module that you will need to modify is the
+<code>Clipper</code> module.
+For this assignment, you will need to complete the method
+<code>clipPolygon()</code>, implementing the Sutherland-Hodgman Polygon
+Clipper algorithm.
+Here is the prototype for this method:
+</p>
+
+<blockquote><pre>int clipPolygon( int in, const Vertex inV[], Vertex outV[],
+		 Vertex ll, Vertex ur );
+</pre></blockquote>
+
+<p>
+where <code>in</code> is the number of vertices in the polygon
+to be clipped,
+<code>inV</code> is an array holding the
+coordinates of the polygon vertices <em>before</em> clipping,
+<code>outV</code> is the array that will hold the
+coordinates of the polygon vertices <em>after</em> clipping,
+<code>ll</code> and <code>ur</code> are the coordinates of the lower-left
+and upper-right corners of the clipping rectangle.
+The function should return the count of vertices after clipping (i.e.,
+the number of vertices which were placed into <code>outV</code>
+by your code.)
+</p>
+
+<p>
+You are free to add additional data members and methods to the
+<code>Clipper</code> module as you see fit;
+however, you cannot modify any of the other modules.
+</p>
+
+<p>
+Here are the image that will be produced by the <code>clipMain</code> program
+with the original <code>Clipper</code> module found in the framework, and 
+the image produced when <code>Clipper</code> contains a working
+Sutherland Hodgman Polygon Clipper implementation:
+</p>
+
+<blockquote>
+<table <tr="" cellpadding="3">
+<tbody><tr><td>
+ <img src="Lab%203_files/ClipTestOriginal.png" alt="sample image" height="320" width="300">
+</td>
+<td>
+ <img src="Lab%203_files/ClipTestResults.png" alt="sample image" height="320" width="300">
+</td>
+</tr>
+<tr>
+<td class="center"><em>Unmodified framework</em></td>
+<td class="center"><em>With working Clipper module</em></td>
+</tr>
+</tbody></table>
+</blockquote>
+
+<p>
+Within these images, outlines in white show the clipping regions;
+outlines in other
+colors are the outlines of the original polygons before clipping.
+Solid-color areas are the polygons that result from clipping against the
+clipping regions.
+</p>
+
+<p>
+In the <code>clipMain</code> driver program provided with the framework,
+the red polygon is entirely inside its clipping region; the blue and
+magenta polygons each have portions outside their clipping regions on a
+single side; and the grey and pink polygons have portions outside their
+clipping regions on multiple sides.
+The green polygon is being clipped against the upper-left square clipping
+region; because it is entirely outside of that region, all of its vertices
+are eliminated by the clipping process.
+The orange polygon has one or more vertices outside with respect to each
+edge of its clipping region, and the light brown polygon completely encloses 
+its clipping region.
+</p>
+
+<hr>
+
+<a name="files"></a>
+<h2>4. Supplied Files</h2>
+
+<p>
+The programming framework for this assignment is available as a ZIP
+archive.
+You can either download the
+<a href="https://cs.rit.edu/%7Ecscix10/labs/protected/lab3/lab3.zip"><code>lab3.zip</code></a>
+archive directly, or retrieve it by executing the command
+</p>
+
+<blockquote><pre>get  cscix10  lab3
+</pre></blockquote>
+
+<p>
+on any CS Ubuntu<sup><a href="#ftn">®</a></sup> system.
+</p>
+
+<p>
+The ZIP archive contains a folder named <code>lab3</code>; under that
+are subfolders <code>c</code>, <code>c++</code>, and <code>misc</code>,
+which contain the obvious things.
+In the C and C++ folders you'll find a file named
+<code>header.mak</code>,
+for use on the CS systems to help you generate a <code>Makefile</code>
+that will compile and link your program with the libraries used by the
+framework.
+See the contents of <code>header.mak</code> for details on how to do
+this.
+In the <code>misc</code> folder you'll find the <code>compmac</code>
+compilation script for Macs.
+</p>
+
+<hr>
+
+<a name="submit"></a>
+<h2>5. What to Submit</h2>
+
+<p>
+Your routines will be tested with a set of driver programs; some
+of them may be different from the driver found in the framework archive.
+Submit <strong><em>only</em></strong>
+your modified <code>Clipper</code> module and any other
+supporting code you write - do not submit the driver program or other
+source code from the framework.
+If you have additional supporting code (e.g., data structures or
+methods), you may either put them in the <code>Clipper</code> source
+files or submit them as additional source files.
+</p>
+
+<p>
+If you are working in C++, your implementation must be in a file named
+<code>Clipper.cpp</code>.
+If your implementation requires making changes to the
+<code>Clipper.h</code> file (e.g., you have added data members or
+member functions to the class declaration), you should submit that file
+along with <code>Clipper.cpp</code>.
+If you make changes to the <code>header.mak</code> file, you may submit
+your modified file as well.
+</p>
+
+<p>
+Similarly, if you are working in C, your implementation must be in a file
+named <code>Clipper.c</code>.
+Again, if your implementation requires making changes to the
+<code>Clipper.h</code> file, you should submit that file
+along with <code>Clipper.c</code>.
+If you make changes to the <code>header.mak</code> file, you may submit
+your modified file as well.
+</p>
+
+<p>
+Turn in only your implementation file(s) described above
+and an optional <code>README</code> file using this command:
+</p>
+
+<blockquote><pre>try  grd-x10  lab3  Clipper.<em>X</em>  <em>optional_files</em>
+</pre></blockquote>
+
+<p>
+where <code><em>X</em></code> is the correct suffix for your code.
+</p>
+
+<p>
+The 'try' scripts will reject submissions that attempt to turn in
+more than the required and optional files listed above.
+</p>
+
+<p>
+If you are working in C or C++, you may optionally submit a modified
+<code>header.mak</code> file and/or a modified <code>Clipper.h</code>
+file.
+The modified <code>header.mak</code> should be based on the version found
+in the ZIP archive.
+If you do not submit one or both of these files, the 'try' scripts
+will use the versions provided with the framework.
+</p>
+
+<p>
+The minimum acceptance test is that your code must be complete - that is,
+it must compile and link cleanly when submitted.
+Submissions <em>will not be accepted</em> if they fail to
+compile and link cleanly.
+(Warning messages from the compiler are acceptable, but not fatal errors.)
+</p>
+
+<p>
+Finally, you can verify that your submission was archived with the
+command
+</p>
+
+<blockquote><pre>try  -q  grd-x10  lab3
+</pre></blockquote>
+
+<p>
+This command will tell you whether or not an archive exists, and if so,
+what files submitted by you are in it.
+</p>
+
+<hr>
+
+<a name="grade"></a>
+<h2>6. Grading</h2>
+
+<p>
+Your grade will be based on your implementation of the required routine
+and its usability with the
+supplied test programs.
+</p>
+
+<p>
+The lists of situations to be checked in your submission (see below) is
+not exhaustive; the tests run during grading may include other
+combinations.
+You may want to modify the test program you are given to cover a wide
+range of input situations.
+</p>
+
+<table>
+<tbody>
+  <tr>
+    <th colspan="2" align="left"><code>clipPolygon</code> Implementation</th>
+    <td>40 points</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>entire figure inside region</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>entire figure outside region</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>one vertex outside with respect to one edge</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>one vertex outside w/r/t two edges</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>two vertices outside w/r/t one edge</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>two vertices outside w/r/t two edge</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>multiple vertices outside region</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>all vertices outside region</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <th colspan="2" align="left">Other Considerations</th>
+    <td>10 points</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>documentation and programming style</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3">&nbsp;</td>
+  </tr>
+  <tr>
+    <th colspan="2" align="left">Grade</th>
+    <td>_____ / 50</td>
+  </tr>
+</tbody>
+</table>
+
+<hr>
+
+<a name="notes"></a>
+<h2>7. Notes</h2>
+
+<p>
+Java applets are available online to help you visualize
+<a href="http://min.nl/cs426/">polygon</a>
+<a href="https://cs.rit.edu/%7Eicss571/clipTrans/PolyClip.html">clipping</a>.
+</p>
+
+<p>
+You are guaranteed that the dimensions of the drawing window will be
+300x300 pixels.
+</p>
+
+<p>
+Recall that the SHPC algorithm discussed in class clips the incoming
+vertex list against <em>one side</em> of the clipping region.
+To clip against the entire region, you'll need to apply the SHPC
+algorithm four times (once per edge of the region) with the
+output vertex list from each application being fed as the input vertex
+list to the next application.
+</p>
+
+<p>
+You are guaranteed that there will be <code>in</code> vertices in the
+<code>inV</code> array, and that they
+are listed in order around the circumference of the polygon (that is,
+adjacent vertices in the arrays form one edge of the polygon, with the
+final edge connecting the last vertex to the first vertex); however,
+the list may be in either clockwise or counter-clockwise order.
+(The test program(s) used during grading will make the same assumptions
+about the vertex count
+returned from <code>clipPolygon()</code>, and the sequencing of the
+vertices <code>outV[]</code> array.)
+</p>
+
+<p>
+It is common knowledge that code for the Sutherland-Hodgman algorithm is
+freely available on the Internet and in textbooks.
+You are free to use these references as a guide, but please do not
+simply cut and paste code from any of these sources.
+</p>
+
+<p>
+Refer back to the
+<a href="https://cs.rit.edu/%7Ecscix10/labs/protected/hello/">"Hello, OpenGL!" programming assignment</a>
+for information about obtaining and installing GLUT and/or GLEW
+libraries.
+</p>
+
+<p>
+Don't wait until the last minute to submit things!
+You may, in fact, want to submit even a partially-working solution as you
+work on it - there is no penalty for making multiple submissions, and
+this will help ensure that you get <em>something</em> submitted for this
+assignment.
+</p>
+
+<p>
+Do not make any changes to the function prototypes.
+This means that your implementations must match the prototypes exactly in
+terms of number, types, and order of parameters.
+The reason for this is that the test programs assume that your
+implementations match those prototypes; if you make changes, there will
+be compilation errors, and even if the test programs link, they almost
+certainly won't execute correctly (which means you'll lose substantial
+amounts of credit for incorrect program performance).
+</p>
+
+<a name="altfiles"></a>
+<p>
+The <code>shader.vert</code> and <code>shader.frag</code> files supplied
+with the framework require GLSL version 1.50, which is only available
+with OpenGL 3.2 or newer.
+If you are attempting to develop your code on a system which doesn't have
+a new-enough version of GLSL, you'll get error messages when these files
+are compiled during the execution of your code.
+The driver program will automatically "fall back" to the alternate
+shaders if GLSL 1.50 isn't available.
+</p>
+
+<hr>
+<a name="ftn"></a>
+<em>
+Ubuntu<sup>®</sup> is a registered trademark of Canonical Ltd.
+
+</em>
+<hr>
+
+
+</body></html>
